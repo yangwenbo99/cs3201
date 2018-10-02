@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 void hello_david () {
+	printf("Hello github, dtql.\n");
 }
 
 void hello_harry () {
@@ -9,5 +10,6 @@ void hello_harry () {
 
 int main (void) {
 	hello_harry();
+	hello_david();
 	return 0;
 }
