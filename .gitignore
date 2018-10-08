@@ -1,3 +1,47 @@
+# 
+# Swap
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+
+# Session
+Session.vim
+
+# Temporary
+.netrwhist
+*~
+# Auto-generated tag files
+tags
+# Persistent undo
+[._]*.un~
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*#
+
+
 # Prerequisites
 *.d
 
@@ -29,12 +73,12 @@
 *.dylib
 
 # Executables
-# *.exe
-# *.out
-# *.app
-# *.i*86
-# *.x86_64
-# *.hex
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
 
 # Debug files
 *.dSYM/
