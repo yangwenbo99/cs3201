@@ -1,7 +1,9 @@
+package simpleMessenger;
+
 public class Server {
-	Server (ChatFrontGenrator cg);
-	ChatFrontGenrator generator;
-	void start();
+	public Server (ChatFrontGenrator cg);
+	private ChatFrontGenrator generator;
+	public void start();
 }
 /*
  * Whenever a new connection established, this sever will genrate 
