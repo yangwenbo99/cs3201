@@ -5,8 +5,8 @@ public interface ChatBack {
 
 	// return true iff sucessfully bind and start the 
 	// return false iff not bind and fail to start
-	public boolean bind (ChatFront chatFront);
-	public boolean stop ();
+	public boolean bind(ChatFront chatFront);
+	public boolean stop();
 
 	// send newly received message to the chat end.
 	// cf is just to ensure that the caller has a CharFront object 
