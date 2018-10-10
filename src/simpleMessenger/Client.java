@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 import java.io.IOException;
 import java.util.Scanner;
 import java.io.PrintWriter;
+import java.util.NoSuchElementException;
 
 public class Client implements ChatBack {
     private Socket      socket = null;
@@ -57,7 +58,6 @@ public class Client implements ChatBack {
                 try {
                     while (!socket.isClosed()) {
                         sb.delete(0, sb.length());
-                        while (in.hasNextLine()) {
                             String line = in.nextLine();
                             if (line.equals("END")) {
                                 front.send(this, sb.toString());
@@ -65,12 +65,13 @@ public class Client implements ChatBack {
                                 sb.append(line);
                                 sb.append('\n');
                             }
-                        }
                         Thread.sleep(100);
                     }
-                } catch (InterruptedException | IllegalStateException e) {
-                    // stop the connection by the user, or by the server
+                } catch (InterruptedException e) {
+                    // stop the connection by the user
                     // no need to handle...
+                } catch (NoSuchElementException e) {
+                    front.end();
                 } finally {
                     closeResources();
                     System.out.println("BACK STOPED");
