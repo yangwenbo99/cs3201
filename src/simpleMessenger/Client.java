@@ -131,8 +131,8 @@ public class Client implements ChatBack {
     public static void main (String[] args) throws Exception {
         System.out.println("Start");
         Client c = new Client();
-        c.connect("127.0.0.1", 8000);
-        ChatFront f = new ChatFrontTest("/tmp/Test.txt");
+        c.connect("127.0.0.1", 35462);
+        ChatFront f = new ChatFrontTest("/tmp/Test2.txt");
         f.bindTo(c);
         c.bind(f);
     }
