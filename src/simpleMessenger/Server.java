@@ -3,6 +3,7 @@ package simpleMessenger;
 import java.net.*;
 import java.util.*;
 import java.io.*;
+
 public class Server {
     private Map<Socket,String> clients = new HashMap<Socket,String>();
     private ServerSocket serverSocket;
@@ -31,9 +32,10 @@ public class Server {
             while (true) {
                 if (clients.isEmpty()) {
                     String op = in.next();
-                    if (op.equals("Quit"))
+                    if (op.equals("Quit")) {
                         t.interrupt();
                         break;
+                    }
                 }                
             }
             serverSocket.close();
@@ -87,12 +89,22 @@ public class Server {
     // to send the message to all the clients
     private void broadCast(String msg, String address) {
         for (Socket client : clients.keySet()) {
+            /*
             try {
                 PrintWriter out = new PrintWriter(
                     new OutputStreamWriter(client.getOutputStream()),
                     true    //auto flush
                 );
                 out.println(address + ": " + msg);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            */
+            try {
+                client.getOutputStream().write(
+                        String.format("%s: \n%s\n", 
+                                address,
+                                msg).getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
