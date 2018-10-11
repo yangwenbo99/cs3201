@@ -102,9 +102,10 @@ public class Server {
             */
             try {
                 client.getOutputStream().write(
-                        String.format("%s: \n%s\n", 
+                        String.format("%s:\n%s\n", 
                                 address,
                                 msg).getBytes());
+                client.getOutputStream().flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }

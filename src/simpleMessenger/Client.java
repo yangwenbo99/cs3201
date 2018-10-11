@@ -57,14 +57,14 @@ public class Client implements ChatBack {
             synchronized (Client.this) {
                 try {
                     while (!socket.isClosed()) {
-                        sb.delete(0, sb.length());
-                            String line = in.nextLine();
-                            if (line.equals("END")) {
-                                front.send(this, sb.toString());
-                            } else {
-                                sb.append(line);
-                                sb.append('\n');
-                            }
+                        String line = in.nextLine();
+                        if (line.equals("END")) {
+                            front.send(this, sb.toString());
+                            sb.delete(0, sb.length());
+                        } else {
+                            sb.append(line);
+                            sb.append('\n');
+                        }
                         Thread.sleep(100);
                     }
                 } catch (InterruptedException e) {
@@ -100,7 +100,7 @@ public class Client implements ChatBack {
      *
      * After calling this method, all operation to the object is undefined
      */
-	public boolean stop(){
+	public boolean stop() {
         try {
             socket.close();
             waitingThread.interrupt();
@@ -125,14 +125,15 @@ public class Client implements ChatBack {
                     "Only corresponding front should call this method");
         } 
         out.print(message);
-        out.flush();
+        out.println("END");
+        // out.flush();
 	}
 
     public static void main (String[] args) throws Exception {
         System.out.println("Start");
         Client c = new Client();
-        c.connect("127.0.0.1", 13245);
-        ChatFront f = new ChatFrontTest("/tmp/Test.txt");
+        c.connect("127.0.0.1", 3456);
+        ChatFront f = new ChatFrontTest("/tmp/Test2.txt");
         f.bindTo(c);
         c.bind(f);
     }
