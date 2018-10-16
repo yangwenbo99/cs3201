@@ -13,20 +13,20 @@ public class Client implements ChatBack {
     private Thread      waitingThread;
     private Scanner     in = null;
     private PrintWriter out = null;
-    /** 
+    /**
      * Connect to server.
      * @return true if successful
      */
-	public void connect(String host, int port) 
-            throws UnknownHostException, IOException {
+    public void connect(String host, int port)
+    throws UnknownHostException, IOException {
         socket = new Socket(host, port);
         // socket.connect(); already connected when constructed
     }
-
+    
     /**
      * Bind this client to a CharFront object.
      */
-	public boolean bind(ChatFront chatFront) {
+    public boolean bind(ChatFront chatFront) {
         this.front = chatFront;
         try {
             start();
@@ -35,23 +35,23 @@ public class Client implements ChatBack {
             return false;
         }
         front.informBound(this);
-
+        
         return true;
     }
-
-    /** 
+    
+    /**
      * Star the clients' receiving message.
      *
-     * This method should only be called after bind, and 
+     * This method should only be called after bind, and
      */
-	private boolean start() throws IOException {
+    private boolean start() throws IOException {
         if (front == null) {
             return false;
         }
-
+        
         in = new Scanner(socket.getInputStream());
         out = new PrintWriter(socket.getOutputStream(), true);
-
+        
         Runnable waitingForGettingMessage = () -> {
             StringBuilder sb = new StringBuilder();
             synchronized (Client.this) {
@@ -62,8 +62,10 @@ public class Client implements ChatBack {
                             front.send(this, sb.toString());
                             sb.delete(0, sb.length());
                         } else {
-                            sb.append(line);
-                            sb.append('\n');
+                            if (!(line.equals("") && sb.length() == 0)) {
+                                sb.append(line);
+                                sb.append('\n');
+                            }
                         }
                         Thread.sleep(100);
                     }
@@ -78,12 +80,12 @@ public class Client implements ChatBack {
                 }
             }
         };
-
+        
         waitingThread = new Thread(waitingForGettingMessage);
         waitingThread.start();
         return true;
     }
-
+    
     synchronized private void closeResources() {
         in.close();
         out.close();
@@ -94,13 +96,13 @@ public class Client implements ChatBack {
             Thread.dumpStack();
         }
     }
-
+    
     /**
      * Stop the connection.
      *
      * After calling this method, all operation to the object is undefined
      */
-	public boolean stop() {
+    public boolean stop() {
         try {
             socket.close();
             waitingThread.interrupt();
@@ -109,32 +111,33 @@ public class Client implements ChatBack {
             return false;
         }
     }
-
+    
     /**
      * Send message from this client to server.
-     * @param cf the ChatFront object bounded to this client (only to make 
+     * @param cf the ChatFront object bounded to this client (only to make
      *          sure that the called is or has the object.
      * @param message message to send
      *
      * This method should only be claaed by bound ChatFront object, cf should
      * be that object. Otherwise, an exception will be thrown.
      */
-	public void send (ChatFront cf, String message) {
+    public void send (ChatFront cf, String message) {
         if (cf != front) {
             throw new IllegalCallerException(
-                    "Only corresponding front should call this method");
-        } 
+                                             "Only corresponding front should call this method");
+        }
         out.print(message);
         out.println("END");
         // out.flush();
-	}
-
+    }
+    
     public static void main (String[] args) throws Exception {
         System.out.println("Start");
         Client c = new Client();
-        c.connect("127.0.0.1", 3456);
+        c.connect("127.0.0.1", 7890);
         ChatFront f = new ChatFrontTest("/tmp/Test2.txt");
         f.bindTo(c);
         c.bind(f);
     }
 }
+

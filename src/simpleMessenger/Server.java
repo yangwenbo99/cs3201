@@ -1,15 +1,20 @@
-package simpleMessenger
+package simpleMessenger;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 import java.net.BindException;
+
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ConcurrentModificationException;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+
 import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 public class Server {
     
@@ -45,14 +50,11 @@ public class Server {
             
             t.start();
             while (true) {
-                // this is handled by server
-                //if (clients.isEmpty()) {
                 String op = in.next();
                 if (op.equals("Quit")) {
                     t.interrupt();
                     break;
                 }
-                //}
             }
             stop();
         } catch (BindException e) {
@@ -62,9 +64,9 @@ public class Server {
         }
     }
     
-    // return a hashmap of client socket and address pair
-    public Map<Socket,String> getClientList() {
-        return this.clients;
+    // return a hash map of client socket and address pair
+    public Collection<String> getClientList() {
+        return this.clients.values();
     }
     
     // return the total number of clients
@@ -108,30 +110,28 @@ public class Server {
                     StringBuilder message = new StringBuilder();
                     try {
                         Scanner in = new Scanner(incoming.getInputStream());
-                        while (!incoming.isClosed() && in.hasNextLine()) {
+                        while (!incoming.isClosed()) {
                             String line = in.nextLine();
                             if (line.trim().equals("END")
                                 ||line.trim().equals("Bye")||line.trim().equals("bye")) {
                                 
-                                if(!line.trim().equals("Bye") && !line.trim().equals("bye"))
-                                    synchronized (this) {
+                                if (!line.trim().equals("Bye") && !line.trim().equals("bye")) {
+                                    synchronized (Server.this) {
                                         broadCast(message.toString(),address);
                                         message.delete(0, message.length());
                                         message.append("\n");
                                     }
-                                else {
+                                } else {
                                     stop(incoming);
                                     in.close();
                                     break;
                                 }
                             } else {
                                 message.append(line);
-                                message.append('\n');
+                                message.append("\nEND\n");
                             }
                         }
-                    } catch (IOException e) {
-                        // where is your justification????????
-                        // Justify whenever you catch an exception but do nothing!!!!!!!
+                    } catch (IOException | NoSuchElementException e) {
                         stop(incoming);
                         in.close();
                     }
@@ -159,17 +159,6 @@ public class Server {
     // to send the message to all the clients
     private void broadCast(String msg, String address) {
         for (Socket client : clients.keySet()) {
-            /*
-             try {
-             PrintWriter out = new PrintWriter(
-             new OutputStreamWriter(client.getOutputStream()),
-             true    //auto flush
-             );
-             out.println(address + ": " + msg);
-             } catch (IOException e) {
-             e.printStackTrace();
-             }
-             */
             try {
                 client.getOutputStream().write(
                                                String.format("%s:\n%s\n",
@@ -177,8 +166,6 @@ public class Server {
                                                              msg).getBytes());
                 client.getOutputStream().flush();
             } catch (IOException e) {
-                stop(client);
-            } catch (ConcurrentModificationException e) {
                 stop(client);
             }
         }
@@ -203,4 +190,3 @@ public class Server {
         }
     }
 }
-
