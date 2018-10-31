@@ -20,8 +20,8 @@ public class Server {
     
     private Map<Socket,String> clients = new ConcurrentHashMap<Socket,String>();
     private ServerSocket serverSocket;
-    private Scanner in;    //can be changed to the front input stream
     final static int MAX_USER = 500;
+    private Thread waitForConnection;
     private static int id = 1;
     /**
      * Construct a new server
@@ -32,8 +32,7 @@ public class Server {
      *      the constructor will throw a BindException
      */
     
-    public Server(String ip, int port, Scanner in) throws BindException{
-        this.in = in;
+    public Server(String ip, int port) throws BindException{
         System.out.println("Wait for connecting...");
         try {
             try {
@@ -47,16 +46,8 @@ public class Server {
                                + "Start listening...");
             // add Thread here
             Thread t = new Thread(() -> addClient());
-            
+            this.waitForConnection = t;
             t.start();
-            while (true) {
-                String op = in.next();
-                if (op.equals("Quit")) {
-                    t.interrupt();
-                    break;
-                }
-            }
-            stop();
         } catch (BindException e) {
             throw e;
         } catch (IOException e) {
@@ -76,7 +67,7 @@ public class Server {
     
     // close all the threads (you can close the server from outside)
     public void stop() {
-        in.close();
+        waitForConnection.interrupt();
         Iterator<Socket> it = clients.keySet().iterator();
         while(it.hasNext()) {
             Socket del = it.next();
@@ -112,28 +103,24 @@ public class Server {
                         Scanner in = new Scanner(incoming.getInputStream());
                         while (!incoming.isClosed()) {
                             String line = in.nextLine();
-                            if (line.trim().equals("END")
-                                ||line.trim().equals("Bye")||line.trim().equals("bye")) {
-                                
-                                if (!line.trim().equals("Bye") && !line.trim().equals("bye")) {
-                                    synchronized (Server.this) {
-                                        broadCast(message.toString(),address);
-                                        message.delete(0, message.length());
-                                        message.append("\n");
-                                    }
-                                } else {
-                                    stop(incoming);
-                                    in.close();
-                                    break;
+                            if (line.trim().equals("END")) {
+                                synchronized (Server.this) {
+                                    broadCast(message.toString(),address);
+                                    message.delete(0, message.length());
+                                    message.append("\n");
                                 }
-                            } else {
+                            } else if (line.trim().equals("Bye")
+                                       ||line.trim().equals("bye")) {
+                                stop(incoming);
+                                in.close();
+                                break;
+                            } else if (line.trim().length()!=0) {
                                 message.append(line);
                                 message.append("\nEND\n");
                             }
                         }
                     } catch (IOException | NoSuchElementException e) {
                         stop(incoming);
-                        in.close();
                     }
                     
                 });
@@ -152,8 +139,12 @@ public class Server {
             // not handle because it is close by user
             
         }
-        System.out.println(clients.get(s) + " is left");
-        clients.remove(s);
+        try {
+            System.out.println(clients.get(s) + " is left");
+            clients.remove(s);
+        } catch (NullPointerException e) {
+            // cannot find the client because it is already deleted => don't need to consider
+        }
     }
     
     // to send the message to all the clients
@@ -180,7 +171,14 @@ public class Server {
             try {
                 System.out.print("Input the port that you want to bind: ");
                 int port = cin.nextInt();
-                Server s = new Server(ip,port,cin);
+                Server s = new Server(ip,port);
+                while (true) {
+                    String op = cin.next();
+                    if (op.equals("Quit")) {
+                        s.stop();
+                        break;
+                    }
+                }
                 System.out.println("Thanks for using");
                 break;
             } catch (BindException e) {
@@ -190,3 +188,4 @@ public class Server {
         }
     }
 }
+
