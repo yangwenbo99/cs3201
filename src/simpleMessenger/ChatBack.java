@@ -1,7 +1,7 @@
 package simpleMessenger;
 
 public interface ChatBack {
-    // private ChatFont front;
+	// private ChatFont front;
 
 	// return true iff sucessfully bind and start the 
 	// return false iff not bind and fail to start
