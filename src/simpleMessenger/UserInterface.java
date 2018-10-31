@@ -38,6 +38,7 @@ public class UserInterface implements ChatFront
 	private ChatBack chatBack;
 	private boolean is_bound;
 	private String identity;
+	private static int id = 1;
 	
 	private JFrame frame;
 	private JPanel inputPanel;
@@ -65,11 +66,17 @@ public class UserInterface implements ChatFront
 		chatBack = null;
 		
 		frame = new JFrame();
-		frame.setTitle("Simple Messenger");
+		if (this.identity.equals("Server")) {
+			frame.setTitle("Simple Messenger - " + "Server");
+		}
+		else {
+			frame.setTitle("Simple Menssenger - " + "Client " + id);
+		}
 		frame.setBounds(100, 100, 1000, 700);
-		frame.setResizable(false);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
-		
+		frame.setResizable(false);		
+		if (this.identity.equals("Client")) {
+			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
+		}
 	
 		outputField = new JTextArea();
 		outputField.setToolTipText("");
@@ -77,7 +84,13 @@ public class UserInterface implements ChatFront
 		outputField.setFont(new Font("Consolas", Font.PLAIN, 17));
 		outputField.setEditable(false);
 		outputField.setBackground(Color.LIGHT_GRAY);
-		outputField.append("Instructions:\nPress <ENTER> to break lines.\nPress <CRTL+ENTER> to send messages.\nEnter END to terminate the program.\n");
+		if (this.identity.equals("Server")){
+			outputField.append("Instructions:\nPress <ENTER> to break lines.\nPress <CRTL+ENTER> to send messages.\nEnter END to terminate the program.\n\nServer\n");
+		}
+		else {
+			outputField.append("Instructions:\nPress <ENTER> to break lines.\nPress <CRTL+ENTER> to send messages.\nEnter END to terminate the program.\n\nClient " + id+"");
+			id++;
+		}
 		outputField.append("\n\n\n\n");
 		
 		editor = new JTextArea(5,90);
@@ -153,9 +166,6 @@ public class UserInterface implements ChatFront
 	}
 	
 	public void end() {
-		if (identity.equals("Server")) {
-			
-		}
 		chatBack.stop();
 		System.exit(0);
 	}
@@ -180,7 +190,7 @@ public class UserInterface implements ChatFront
 	}
      */
 	
-	public class RequestFocusListener implements AncestorListener
+	private class RequestFocusListener implements AncestorListener
 	{
 		private boolean removeListener;
 
@@ -188,7 +198,7 @@ public class UserInterface implements ChatFront
 		 *  Convenience constructor. The listener is only used once and then it is
 		 *  removed from the component.
 		 */
-		public RequestFocusListener()
+		private RequestFocusListener()
 		{
 			this(true);
 		}
@@ -200,7 +210,7 @@ public class UserInterface implements ChatFront
 		 *  @param removeListener when true this listener is only invoked once
 		 *                        otherwise it can be invoked multiple times.
 		 */
-		public RequestFocusListener(boolean removeListener)
+		private RequestFocusListener(boolean removeListener)
 		{
 			this.removeListener = removeListener;
 		}
@@ -222,7 +232,7 @@ public class UserInterface implements ChatFront
 		public void ancestorRemoved(AncestorEvent e) {}
 	}
 	
-	public class inputAction implements ActionListener {	
+	private class inputAction implements ActionListener {	
 		
 		public void actionPerformed (ActionEvent event) {
 			pushToOutput();
@@ -230,7 +240,7 @@ public class UserInterface implements ChatFront
 	}
 	
 	
-	public class multiKeyPressListener implements KeyListener {
+	private class multiKeyPressListener implements KeyListener {
 	    @Override
 	    public synchronized void keyPressed(KeyEvent e) {
 	    	if (e.isControlDown()&&e.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -245,11 +255,11 @@ public class UserInterface implements ChatFront
 	    public void keyTyped(KeyEvent e) {/* Not used */ }
 	}
 	
-	public void pushToOutput() {
+	private void pushToOutput() {
 		String input;
 		input = editor.getText();
 		if (input.equals(""))
-			outputField.append("The input should not be empty!");
+			outputField.append("The input should not be empty!\n");
 		else if(input.equals("END"))
 				this.end();
 		else {
@@ -259,7 +269,7 @@ public class UserInterface implements ChatFront
 		editor.requestFocus();
 	}
 	
-	public void pushToOutput(String s) {
+	private void pushToOutput(String s) {
 		outputField.append(s);
 	}
 	
@@ -291,13 +301,16 @@ public class UserInterface implements ChatFront
 	                Server s = new Server(r_ip,port);
                     Client c = new Client();
                     c.connect(r_ip,port);
-                    ChatFront f = new UserInterface("Client");
+                    ChatFront f = new UserInterface("Server");
                     f.bindTo(c);
                     c.bind(f);
-                   // while (true) {
-                   //     if (
-                   // }
-	                
+                    while (true) {
+                    	String op = in.next();
+                    	if (op.equals("End")) {
+                    		s.stop();
+                    		break;
+                    	}
+                    }
 	                System.out.println("Thanks for using");
 	                break;
 	            } catch (BindException e) {
@@ -308,5 +321,6 @@ public class UserInterface implements ChatFront
 		} else {
 			System.out.println("Program terminated.");
 		}
+		in.close();
 	}
 }
