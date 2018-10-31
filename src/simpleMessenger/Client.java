@@ -132,7 +132,7 @@ public class Client implements ChatBack {
     public static void main (String[] args) throws Exception {
         System.out.println("Start");
         Client c = new Client();
-        c.connect("127.0.0.1", 3456);
+        c.connect("127.0.0.1", 45867);
         ChatFront f = new ChatFrontTest("/tmp/Test2.txt");
         f.bindTo(c);
         c.bind(f);
