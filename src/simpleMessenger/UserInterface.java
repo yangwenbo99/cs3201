@@ -160,6 +160,7 @@ public class UserInterface implements ChatFront
 		System.exit(0);
 	}
 	
+    /*
 	public class StateEvent extends EventObject {
 		private boolean is_terminated = false;
 
@@ -177,6 +178,7 @@ public class UserInterface implements ChatFront
 			if ()
 		}
 	}
+     */
 	
 	public class RequestFocusListener implements AncestorListener
 	{
@@ -287,7 +289,14 @@ public class UserInterface implements ChatFront
 	                System.out.print("Input the port that you want to bind: ");
 	                int port = in.nextInt();
 	                Server s = new Server(r_ip,port);
-	                
+                    Client c = new Client();
+                    c.connect(r_ip,port);
+                    ChatFront f = new UserInterface("Client");
+                    f.bindTo(c);
+                    c.bind(f);
+                   // while (true) {
+                   //     if (
+                   // }
 	                
 	                System.out.println("Thanks for using");
 	                break;
