@@ -17,7 +17,6 @@ import java.util.Scanner;
 
 
 public class Server {
-    
     private Map<Socket,String> clients = new ConcurrentHashMap<Socket,String>();
     private ServerSocket serverSocket;
     final static int MAX_USER = 500;
@@ -26,10 +25,11 @@ public class Server {
     /**
      * Construct a new server
      * @param ip the IP address and the port number
-     * @param port the input stream (you can change my code), that can be used to terminate the server
-     * @param in when there is no client in the hash map, you can type "Quit" to the terminal to stop
-     *      the server program
-     *      the constructor will throw a BindException
+     * @param port the input stream (you can change my code), that can 
+     *             be used to terminate the server
+     * @param in when there is no client in the hash map, you can type 
+     *           "Quit" to the terminal to stop the server program
+     *           the constructor will throw a BindException
      */
     
     public Server(String ip, int port) throws BindException{
@@ -99,24 +99,20 @@ public class Server {
                 
                 Thread t = new Thread(() -> {
                     StringBuilder message = new StringBuilder();
-                    try {
-                        Scanner in = new Scanner(incoming.getInputStream());
+                    try (Scanner in = new Scanner(incoming.getInputStream())) {
                         while (!incoming.isClosed()) {
                             String line = in.nextLine();
                             if (line.trim().equals("END")) {
                                 synchronized (Server.this) {
+                                    message.append("END\n\n");
                                     broadCast(message.toString(),address);
                                     message.delete(0, message.length());
+                                }
+                            } else {
+                                if (message.length() != 0 || !line.equals("")) {
+                                    message.append(line);
                                     message.append("\n");
                                 }
-                            } else if (line.trim().equals("Bye")
-                                       ||line.trim().equals("bye")) {
-                                stop(incoming);
-                                in.close();
-                                break;
-                            } else if (line.trim().length()!=0) {
-                                message.append(line);
-                                message.append("\nEND\n");
                             }
                         }
                     } catch (IOException | NoSuchElementException e) {
