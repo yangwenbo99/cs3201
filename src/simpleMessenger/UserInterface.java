@@ -6,32 +6,25 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
-import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
 import javax.swing.text.DefaultCaret;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JEditorPane;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.EventHandler;
 import java.io.IOException;
 import java.net.BindException;
-import java.util.EventListener;
-import java.util.EventObject;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.Scanner;
-import java.util.Set;
-import java.util.Timer;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import javax.swing.SwingConstants;
-import javax.swing.DropMode;
 
 public class UserInterface implements ChatFront
 {
@@ -49,7 +42,6 @@ public class UserInterface implements ChatFront
 	private JTextArea editor;
 	private DefaultCaret caret_output;
 	private DefaultCaret caret_input;
-	private boolean is_firsttime;
 	
 	/**
 	 * Create the application.
@@ -72,13 +64,13 @@ public class UserInterface implements ChatFront
 		else {
 			frame.setTitle("Simple Menssenger - " + "Client " + id);
 		}
-		frame.setBounds(100, 100, 1000, 700);
-		frame.setResizable(false);		
+		frame.setBounds(100, 100, 1000, 650);	
 		if (this.identity.equals("Client")) {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);		
 		}
+		frame.setMinimumSize(new Dimension(700,475));
 	
-		outputField = new JTextArea();
+		outputField = new JTextArea(20,20);
 		outputField.setToolTipText("");
 		outputField.setLineWrap(true);
 		outputField.setFont(new Font("Consolas", Font.PLAIN, 17));
@@ -93,7 +85,7 @@ public class UserInterface implements ChatFront
 		}
 		outputField.append("\n\n\n\n");
 		
-		editor = new JTextArea(5,90);
+		editor = new JTextArea(4,20);
 		editor.setToolTipText("Press <ENTER> to break lines. Press <CTRL+ENTER> to send messages.");
 		editor.setLineWrap(true);
 		editor.setFont(new Font("Consolas", Font.PLAIN, 15));
@@ -102,7 +94,7 @@ public class UserInterface implements ChatFront
 		
 		scrollPane_output = new JScrollPane(outputField);
 		scrollPane_output.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		frame.getContentPane().add(scrollPane_output,BorderLayout.CENTER);
+		//frame.getContentPane().add(scrollPane_output,BorderLayout.CENTER);
 		
 		scrollPane_input = new JScrollPane(editor);
 		scrollPane_input.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
@@ -118,14 +110,31 @@ public class UserInterface implements ChatFront
 		button = new JButton("Send");
 		button.addActionListener(new inputAction());		
 		
-		inputPanel = new JPanel();
+		//inputPanel = new JPanel();
 		
-		inputPanel.add(scrollPane_input,BorderLayout.CENTER);
-		inputPanel.add(button,BorderLayout.EAST);
+		//inputPanel.add(scrollPane_input,BorderLayout.WEST);
+		//inputPanel.add(button,BorderLayout.EAST);
 		
-		frame.getContentPane().add(inputPanel, BorderLayout.SOUTH);
+		//frame.getContentPane().add(inputPanel, BorderLayout.SOUTH);
+		//frame.setLocationRelativeTo(null);
 		
-		is_firsttime = true;
+		GroupLayout layout = new GroupLayout(frame.getContentPane());
+		frame.getContentPane().setLayout(layout);
+		layout.setAutoCreateGaps(true);
+		layout.setAutoCreateContainerGaps(true);
+		
+		layout.setHorizontalGroup(layout.createSequentialGroup()
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(scrollPane_output,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,Short.MAX_VALUE)
+						.addGroup(layout.createSequentialGroup()
+								.addComponent(scrollPane_input,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,Short.MAX_VALUE)
+								.addComponent(button,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE))));
+		
+		layout.setVerticalGroup(layout.createSequentialGroup()
+				.addComponent(scrollPane_output,0,GroupLayout.DEFAULT_SIZE,Short.MAX_VALUE)
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
+						.addComponent(scrollPane_input,GroupLayout.PREFERRED_SIZE,GroupLayout.DEFAULT_SIZE,GroupLayout.PREFERRED_SIZE)
+						.addComponent(button)));
 		
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -169,26 +178,6 @@ public class UserInterface implements ChatFront
 		chatBack.stop();
 		System.exit(0);
 	}
-	
-    /*
-	public class StateEvent extends EventObject {
-		private boolean is_terminated = false;
-
-		public StateEvent(Object arg0) {
-			super(arg0);
-		}
-		
-		public void changeState(boolean ins) {
-			is_terminated = ins;
-		}
-	}
-	
-	public class EndListener implements EventListener{
-		public void EndListener (StateEvent event) {
-			if ()
-		}
-	}
-     */
 	
 	private class RequestFocusListener implements AncestorListener
 	{
@@ -258,8 +247,10 @@ public class UserInterface implements ChatFront
 	private void pushToOutput() {
 		String input;
 		input = editor.getText();
-		if (input.equals(""))
+		if (input.equals("")) {
 			outputField.append("The input should not be empty!\n");
+			outputField.setCaretPosition(outputField.getDocument().getLength());
+		}
 		else if(input.equals("END"))
 				this.end();
 		else {
@@ -271,6 +262,7 @@ public class UserInterface implements ChatFront
 	
 	private void pushToOutput(String s) {
 		outputField.append(s);
+		outputField.setCaretPosition(outputField.getDocument().getLength());
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -282,15 +274,24 @@ public class UserInterface implements ChatFront
 		String ins;
 		ins = in.next();
 		if (ins.equals("c")||ins.equals("C")) {
-			System.out.print("\nRemote IP: ");
-			String ip = in.next();
-			System.out.print("Port Number: ");
-			int port = in.nextInt();
-			Client c = new Client();			
-		    c.connect(ip, port);
-		    ChatFront f = new UserInterface("Client");
-		    f.bindTo(c);
-		    c.bind(f);
+			while(true) {
+				try {
+					System.out.print("\nRemote IP: ");
+					String ip = in.next();
+					System.out.print("Port Number: ");
+					int port = in.nextInt();
+					Client c = new Client();			
+				    c.connect(ip, port);
+				    ChatFront f = new UserInterface("Client");
+				    f.bindTo(c);
+				    c.bind(f);
+				    break;
+				} catch (ConnectException e) {
+					System.out.println("The port number is wrong");
+				} catch (SocketException s) {
+					System.out.println("Network is unreachable");
+				}
+			}
 		} else if (ins.equals("W")||ins.equals("w")){
 			System.out.print("\nInput local machine: ");
 	        String r_ip = in.next();
