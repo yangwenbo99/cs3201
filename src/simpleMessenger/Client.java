@@ -124,7 +124,7 @@ public class Client implements ChatBack {
     public void send (ChatFront cf, String message) {
         if (cf != front) {
             throw new IllegalCallerException(
-                                             "Only corresponding front should call this method");
+                    "Only corresponding front should call this method");
         }
         out.print(message);
         out.println("END");
