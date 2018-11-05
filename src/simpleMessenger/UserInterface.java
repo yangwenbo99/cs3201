@@ -77,10 +77,15 @@ public class UserInterface implements ChatFront
 		outputField.setEditable(false);
 		outputField.setBackground(Color.LIGHT_GRAY);
 		if (this.identity.equals("Server")){
-			outputField.append("Instructions:\nPress <ENTER> to break lines.\nPress <CRTL+ENTER> to send messages.\nEnter END to terminate the program.\n\nServer\n");
+			outputField.append("Instructions:\n"
+					+ "Press <ENTER> to break lines.\nPress "
+					+ "<CRTL+ENTER> to send messages.\n"
+					+ "Enter END to terminate the program.\n\nServer\n");
 		}
 		else {
-			outputField.append("Instructions:\nPress <ENTER> to break lines.\nPress <CRTL+ENTER> to send messages.\nEnter END to terminate the program.\n\nClient " + id+"");
+			outputField.append("Instructions:\nPress <ENTER> to break lines.\n"
+					+ "Press <CRTL+ENTER> to send messages.\n"
+					+ "Enter END to terminate the program.\n\nClient " + id+"");
 			id++;
 		}
 		outputField.append("\n\n\n\n");
