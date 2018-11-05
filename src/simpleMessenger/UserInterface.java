@@ -5,7 +5,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import java.awt.BorderLayout;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
@@ -18,13 +17,9 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.net.BindException;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.util.Scanner;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.Scanner;
 
 public class UserInterface implements ChatFront
 {
@@ -114,14 +109,6 @@ public class UserInterface implements ChatFront
 				
 		button = new JButton("Send");
 		button.addActionListener(new inputAction());		
-		
-		//inputPanel = new JPanel();
-		
-		//inputPanel.add(scrollPane_input,BorderLayout.WEST);
-		//inputPanel.add(button,BorderLayout.EAST);
-		
-		//frame.getContentPane().add(inputPanel, BorderLayout.SOUTH);
-		//frame.setLocationRelativeTo(null);
 		
 		GroupLayout layout = new GroupLayout(frame.getContentPane());
 		frame.getContentPane().setLayout(layout);
@@ -256,10 +243,19 @@ public class UserInterface implements ChatFront
 			outputField.append("The input should not be empty!\n");
 			outputField.setCaretPosition(outputField.getDocument().getLength());
 		}
-		else if(input.equals("END"))
-				this.end();
 		else {
-			chatBack.send(this, input + "\n");
+			boolean is_end_contained = false;
+			Scanner sin = new Scanner(input);
+			while(sin.hasNext()) {
+				if(sin.nextLine().trim().equals("END"))
+					is_end_contained = true;
+			}
+			if (is_end_contained) {
+				outputField.append("Any single line in input should not be exactly as 'END'!\n");
+			}
+			else {
+				chatBack.send(this, input + "\n");
+			}
 		}
 		editor.setText("");
 		editor.requestFocus();
@@ -268,65 +264,5 @@ public class UserInterface implements ChatFront
 	private void pushToOutput(String s) {
 		outputField.append(s);
 		outputField.setCaretPosition(outputField.getDocument().getLength());
-	}
-	
-	public static void main(String[] args) throws IOException {
-		Scanner in = new Scanner(System.in);
-		System.out.print("***     SIMPLE TEXT MESSENGER   ***\r\n" + 
-				"(C)onnect peer\r\n" + 
-				"(W)ait for the other peer connecting\r\n" + 
-				"(Q)uit\n" + "Please choose: ");
-		String ins;
-		ins = in.next();
-		if (ins.equals("c")||ins.equals("C")) {
-			while(true) {
-				try {
-					System.out.print("\nRemote IP: ");
-					String ip = in.next();
-					System.out.print("Port Number: ");
-					int port = in.nextInt();
-					Client c = new Client();			
-				    c.connect(ip, port);
-				    ChatFront f = new UserInterface("Client");
-				    f.bindTo(c);
-				    c.bind(f);
-				    break;
-				} catch (ConnectException e) {
-					System.out.println("The port number is wrong");
-				} catch (SocketException s) {
-					System.out.println("Network is unreachable");
-				}
-			}
-		} else if (ins.equals("W")||ins.equals("w")){
-			System.out.print("\nInput local machine: ");
-	        String r_ip = in.next();
-	        while(true) {
-	            try {
-	                System.out.print("Input the port that you want to bind: ");
-	                int port = in.nextInt();
-	                Server s = new Server(r_ip,port);
-                    Client c = new Client();
-                    c.connect(r_ip,port);
-                    ChatFront f = new UserInterface("Server");
-                    f.bindTo(c);
-                    c.bind(f);
-                    while (true) {
-                    	String op = in.next();
-                    	if (op.equals("End")) {
-                    		s.stop();
-                    		break;
-                    	}
-                    }
-	                System.out.println("Thanks for using");
-	                break;
-	            } catch (BindException e) {
-	                System.out.println("The port is being used, please try another one");
-	                continue;
-	            }
-	        }
-		} else {
-			System.out.println("Program terminated.");
-		}
-		in.close();
 	}
 }
