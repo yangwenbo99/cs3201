@@ -47,6 +47,7 @@ public class Main {
                     ChatFront f = new UserInterface("Server");
                     f.bindTo(c);
                     c.bind(f);
+                    System.out.println("\nServer successfully generated. Enter 'End' in command line to terminate\n");
                     while (true) {
                     	String op = in.next();
                     	if (op.equals("End")) {
