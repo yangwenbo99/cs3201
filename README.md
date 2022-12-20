@@ -55,3 +55,6 @@ When the client presses `“CTRL+Enter”` or the Send button, the interface wil
 
 
 
+
+
+For more information, please see our [report](./project_report.pdf)
